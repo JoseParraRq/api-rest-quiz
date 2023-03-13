@@ -11,7 +11,7 @@ export class UsersService {
         @InjectRepository(Users) private userRepository:Repository<Users>){}
 
         async createUser(createUser:CreateUserDto){
-            try {
+        
                 const { email,password } = createUser;
                 const userFound = await this.userRepository.findOne({
                     where:{
@@ -33,9 +33,6 @@ export class UsersService {
                 createUser={ ...createUser,password:plainToHash};
 
                 return this.userRepository.save(createUser)
-                
-            } catch (error) {
-                
-            }
+   
         }
 }

@@ -7,6 +7,8 @@ import { CreateCocktailDto } from './entity/dto/createCocktail.dto';
 import { Category } from 'src/category/category.entity';
 import { Glass } from 'src/glass/glass.entity';
 import { Users } from 'src/users/entity/users.entity';
+import { DeleteCocktailDto } from './entity/dto/deleteCocktail.dto';
+import { isArray, isObject } from 'class-validator';
 // import { ApiExtrenalService } from 'src/api-extrenal/api-extrenal.service';
 
 @Injectable()
@@ -17,17 +19,15 @@ export class CocktailsService {
         @InjectRepository(Users) private userRepository: Repository<Users>) { }
 
     async findDrinks(cocktail: string) {
-        try {
+
             const response = await axios.get(`https://www.thecocktaildb.com/api/json/v1/1/search.php?s=${cocktail}`);
             const result = response.data.drinks;
             if (typeof result === 'undefined' || result === null) {
-                const exception = new HttpException(
+                throw  new HttpException(
                     'This cocktail name is incorrect or does not exist in our inventory.',
                     HttpStatus.NOT_FOUND,
                 );
-                return {
-                    response: exception
-                };
+              
                 // throw new HttpException('This cocktail name is incorrect or does not exist in our inventory.', HttpStatus.NOT_FOUND);
             } else {
                 const mapResult = result.map((e: any) => {
@@ -45,17 +45,12 @@ export class CocktailsService {
                     status: true
                 }
             }
-        } catch (error) {
-            console.log(error);
-            return {
-                error: `an internal error has occurred ${error}`
-            }
-        }
+       
     }
 
     async createCocktail(createCocktail: CreateCocktailDto) {
 
-        try {
+ 
             const { name,
                 //  category,
                 //   glass,
@@ -70,13 +65,10 @@ export class CocktailsService {
             }
 
             if (getDrink.response.length > 1) {
-                const exception = new HttpException(
+                throw new HttpException(
                     'Please specify the name of a specific cocktail',
                     HttpStatus.NOT_FOUND,
                 );
-                return {
-                    response: exception
-                };
             }
 
             const category = getDrink.response[0].category;
@@ -101,13 +93,10 @@ export class CocktailsService {
             });
 
             if (!findUser) {
-                const exception = new HttpException(
+                throw  new HttpException(
                     'This user is incorrect or does not exist in our database.',
                     HttpStatus.BAD_REQUEST,
                 );
-                return {
-                    response: exception
-                };
             }
             const nameCocktail: string = getDrink.response[0].drinkName;
 
@@ -121,16 +110,54 @@ export class CocktailsService {
             console.log("cocktail", cocktail);
             return this.cocktailsRepository.save(cocktail)
 
-        } catch (error) {
-
-        }
+     
     }
 
     async getCocktailsByUserId(id: number) {
-        try {
 
-        } catch (error) {
+            const userFound = await this.userRepository.findOne({
+                where: {
+                    id: id
+                }
+            });
 
-        }
+            if (!userFound) {
+                throw new HttpException(
+                    'This userId is incorrect or does not exist in our database.',
+                    HttpStatus.BAD_REQUEST,
+                );
+            }
+
+            const getCocktails = await this.cocktailsRepository
+                .createQueryBuilder("cocktails")
+                .where("userId = :id", { id: userFound.id })
+                .getMany();
+
+            return getCocktails;
+    }
+
+    async deleteCocktailById(deleteCocktail: DeleteCocktailDto) {
+
+            const { userId, cocktailId } = deleteCocktail;
+            const getCocktailsDelete = await this.getCocktailsByUserId(userId);
+
+            if (isArray(getCocktailsDelete)) {
+                const checkCocktailsId  = getCocktailsDelete.find((e:any)=>e.id === cocktailId)
+                if(checkCocktailsId === undefined){
+
+                    throw new HttpException(
+                        'This Cocktail Id is incorrect.',
+                        HttpStatus.BAD_REQUEST,
+                    );
+                 
+                }else{
+                    await this.cocktailsRepository.delete(cocktailId);  
+                    return 'The cocktail was successfully removed!'
+                } 
+            }
+
+            if (isObject(getCocktailsDelete)) {
+            return getCocktailsDelete
+            }
     }
 }

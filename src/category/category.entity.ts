@@ -17,9 +17,6 @@ import {
     @Column('varchar', { unique: true, nullable: false })
     name: string;
 
-  
-    // @Column({ nullable: true })
-    // authStrategy: string;
     @OneToMany(() => Cocktails, (cocktails) => cocktails.category)
     cocktails: Cocktails[]
   }

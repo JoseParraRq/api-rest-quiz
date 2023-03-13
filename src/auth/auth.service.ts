@@ -15,7 +15,6 @@ export class AuthService {
     ) { }
 
     async login(loginUser: UserLoginDto) {
-        try {
             const { email, password } = loginUser;
             const userFound = await this.userRepository.findOne({
                 where: {
@@ -24,24 +23,20 @@ export class AuthService {
             });
 
             if (!userFound) {
-                const exception = new HttpException(
+                throw new HttpException(
                     'this email do not be Register',
                     HttpStatus.NOT_FOUND,
                 );
-                return {
-                    response: exception
-                };
+              
             }
 
             const checkPassword = await compare(password, userFound.password)
             if (!checkPassword) {
-                const exception = new HttpException(
+                throw  new HttpException(
                     'this password is incorrect',
                     HttpStatus.NOT_FOUND,
                 );
-                return {
-                    response: exception
-                };
+              
             }
 
             // const jwtService = new JwtService;
@@ -50,23 +45,16 @@ export class AuthService {
                 id:userFound,
                 userName:userFound.userName
             }
-            console.log("here the payload===>>",payload);
 
             // const token =  jwtService.sign(payload)
             const token =  this.jwtService.sign(payload)
 
-            console.log("the token===>",token);
             
             const data = {
                 user:userFound,
                 token: token
             };
-            console.log("here the datatoken===>>",data);
             
             return data;
-
-        } catch (error) {
-
-        }
     }
 }

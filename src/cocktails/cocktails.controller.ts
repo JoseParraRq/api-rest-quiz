@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { CocktailsService } from './cocktails.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CreateCocktailDto } from './entity/dto/createCocktail.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { DeleteCocktailDto } from './entity/dto/deleteCocktail.dto';
 
 @ApiBearerAuth()
 @ApiTags('cocktails')
@@ -22,9 +23,14 @@ export class CocktailsController {
         return this.cocktailService.createCocktail(createCocktail);
     }
 
-    @Get(':id')
+    @Get('userId/:id')
     async getCocktailsByUserId(@Param('id') id:number) {
       return this.cocktailService.getCocktailsByUserId(id);
+    }
+
+    @Delete('deleteCocktail')
+    async deleteCocktailById(@Body() deleteCocktail:DeleteCocktailDto) {
+      return this.cocktailService.deleteCocktailById(deleteCocktail);
     }
 
     }

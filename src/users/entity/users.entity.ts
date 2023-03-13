@@ -27,6 +27,5 @@ import {
     createdAt: Date;
   
     @OneToMany(() => Cocktails, (cocktails) => cocktails.user)
-    cocktails: Users[]
-   
+    cocktails: Users
   }

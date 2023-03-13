@@ -26,6 +26,7 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+this is an apirest for quiz by JOSE FERNANDO PARRA MABESOY, please dont forget check the initial-data.sql for a correct functionality
 ## Installation
 
 ```bash
