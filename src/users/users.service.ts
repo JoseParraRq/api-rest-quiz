@@ -20,13 +20,10 @@ export class UsersService {
                 });
 
                 if (userFound){
-                    const exception = new HttpException(
+                    throw new HttpException(
                         'this email already exist',
                         HttpStatus.BAD_REQUEST,
                     );
-                    return {
-                        response: exception
-                    };
                 }
                 const plainToHash = await hash(password,10);
 
